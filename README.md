@@ -1,2 +1,2 @@
 # operating-systems
-Repository for team collab in school
+Repository for OS team collab in school
