@@ -24,8 +24,9 @@ void Scheduler() {               // choose a PID as current_pid to load/run
     breakpoint();
   }
 
-  current_pid = DeQ(&ready_q) pcb[current_pid].state = RUN;  // from RUN
-  cpu_time = 0;
+  current_pid = DeQ(&ready_q);
+  pcb[current_pid].state = RUN;  // from RUN
+  pcb[current_pid].cpu_time = 0;
 }
 
 // OS bootstrap from main() which is process 0, so we do not use this PID
@@ -34,11 +35,11 @@ int main() {
   struct i386_gate *IDT_p;  // DRAM location where IDT is
 
   // use tool function MyBzero to clear the two PID queues
-  MyBzero(&free_q, sizeof(q_t));
-  MyBzero(&ready_q, sizeof(q_t))
+  MyBzero((char *)&free_q, sizeof(q_t));
+  MyBzero((char *)&ready_q, sizeof(q_t));
 
-      // queue free queue with PID 1~19
-      for (i = 1; i < Q_SIZE; i++) {
+  // queue free queue with PID 1~19
+  for (i = 1; i < Q_SIZE; i++) {
     EnQ(i, &free_q);
   }
   // init IDT_p
@@ -71,7 +72,7 @@ void Kernel(TF_t *TF_p) {  // kernel code exec (at least 100 times/second)
   // switch according to the event_num in the TF TF_p points to
   switch (TF_p->event_num) {
     case TIMER_EVENT:
-      TimerEventHandler();
+      TimerEvent();
       break;
     default:
       cons_printf("Kernel Panic: Unknown event_num %d!", TF_p->event_num);

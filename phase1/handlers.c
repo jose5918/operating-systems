@@ -19,15 +19,15 @@ void NewProcHandler(func_ptr_t p) {  // arg: where process code starts
   // Get 'pid' from free_q
   pid = DeQ(&free_q);
   // Clear the process controll block
-  MyBzero(&pcb[pid], sizeof(pcb_t));
+  MyBzero((char *)&pcb[pid], sizeof(pcb_t));
   // Clear the runtime stack
-  MyBzero(&pcb[pid], PROC_STACK_SIZE);
+  MyBzero((char *)&pcb[pid], PROC_STACK_SIZE);
   // Process state now READY
   pcb[pid].state = READY;
   EnQ(pid, &ready_q);
 
   // point TF_p to highest area in the stack (but has space for a TF)
-  pcb[pid].TF_p = (TF_t *)&proc_stack[pid].[PROC_STACK_SIZE];
+  pcb[pid].TF_p = (TF_t *)&proc_stack[pid][PROC_STACK_SIZE];
   pcb[pid].TF_p->eip = (int)p;
   pcb[pid].TF_p->eflags = EF_DEFAULT_VALUE | EF_INTR;
 
@@ -49,5 +49,5 @@ void TimerHandler(void) {
     current_pid = 0;
   }
 
-  Don't forget: notify PIC event-handling done 
+  outportb(0x20, 0x60);
 }
