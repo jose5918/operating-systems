@@ -1,14 +1,14 @@
 // main.c, 159
 // this is kernel code for phase 1
 //
-// Team Name: ??????? (Members: ?????? and ??????)
+// Team Name: Clang (Members: Jose Aguirre and Ahriben Gonzalez)
 
-#include "events.h"    // events for kernel to serve
-#include "handlers.h"  // handler code
-#include "proc.h"      // processes such as Init()
-#include "spede.h"     // given SPEDE stuff
-#include "tools.h"     // small functions for handlers
-#include "types.h"     // data types
+#include "spede.h"      // given SPEDE stuff
+#include "handlers.h"   // handler code
+#include "tools.h"      // small functions for handlers
+#include "proc.h"       // processes such as Init()
+#include "types.h"      // data types
+#include "events.h"     // events for kernel to serve
 
 // kernel's own data:
 int current_pid;      // current selected PID; if 0, none selected

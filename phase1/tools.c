@@ -37,7 +37,7 @@ void EnQ(int data, q_t *p) {
     return;
   }
   // add data into the array index by the size of the queue
-  p->q[size] = data;
+  p->q[p->size] = data;
   // increment the size of the queue
   p->size++;
 }
