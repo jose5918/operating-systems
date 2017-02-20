@@ -1,5 +1,4 @@
 // main.c, 159
-// this is kernel code for phase 1
 //
 // Team Name: Clang (Members: Jose Aguirre and Ahriben Gonzalez)
 
@@ -15,6 +14,7 @@ int current_pid;      // current selected PID; if 0, none selected
 q_t ready_q, free_q;  // processes ready to run and not used
 pcb_t pcb[PROC_NUM];  // process control blocks
 char proc_stack[PROC_NUM][PROC_STACK_SIZE];  // process runtime stacks
+int current_time;
 
 void Scheduler() {               // choose a PID as current_pid to load/run
   if (current_pid != 0) return;  // if continue below, find one for current_pid
@@ -32,8 +32,11 @@ void Scheduler() {               // choose a PID as current_pid to load/run
 // OS bootstrap from main() which is process 0, so we do not use this PID
 int main() {
   int i;
+	
   struct i386_gate *IDT_p;  // DRAM location where IDT is
 
+	current_time = 0;
+	current_pid = 0;  
   // use tool function MyBzero to clear the two PID queues
   MyBzero((char *)&free_q, sizeof(q_t));
   MyBzero((char *)&ready_q, sizeof(q_t));
@@ -47,6 +50,8 @@ int main() {
   cons_printf("IDT located at DRAM addr %x (%d).\n", IDT_p);
   // set IDT entry 32 like our timer lab  // fillgate
   fill_gate(&IDT_p[TIMER_EVENT], (int)TimerEvent, get_cs(), ACC_INTR_GATE, 0);
+	fill_gate(&IDT_p[SLEEP_EVENT], (int)SleepEvent, get_cs(), ACC_INTR_GATE, 0);
+	fill_gate(&IDT_p[GETPID_EVENT], (int)GetPidEvent, get_cs(), ACC_INTR_GATE, 0);
   // set PIC mask to open up for timer IRQ0 only // outport
   outportb(0x21, ~1);
 
@@ -56,7 +61,6 @@ int main() {
   // Init passed as function pointer
   NewProcHandler(Init);
   // call Scheduler() to select current_pid (will be 1)
-  current_pid = 0;  
   Scheduler();
   // call Loader with the TF address of current_pid
   Loader(pcb[current_pid].TF_p);
@@ -70,8 +74,14 @@ void Kernel(TF_t *TF_p) {  // kernel code exec (at least 100 times/second)
   // switch according to the event_num in the TF TF_p points to
   switch (TF_p->event_num) {
     case TIMER_EVENT:
-      TimerEvent();
+      TimerHandler();
       break;
+		case GETPID_EVENT:
+			GetPidHandler();
+			break;
+		case SLEEP_EVENT:
+			SleepHandler();
+			break;
     default:
       cons_printf("Kernel Panic: Unknown event_num %d!", TF_p->event_num);
       breakpoint();

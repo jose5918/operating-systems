@@ -42,13 +42,38 @@ void NewProcHandler(func_ptr_t p) {  // arg: where process code starts
 
 // count cpu_time of running process and preempt it if reaching limit
 void TimerHandler(void) {
+	int i;
   pcb[current_pid].cpu_time++;
+	current_time++;
   // not too sure about things under this
-  if (pcb[current_pid].cpu_time == TIME_LIMIT) {
+	for(i = 0; i < PROC_NUM ; i++){
+		if(pcb[i].state == SLEEP && pcb[i].wake_time == current_time){
+			pcb[i].state = READY;		
+			EnQ(i, &ready_q);
+		}
+	}			
+   
+
+
+	if (pcb[current_pid].cpu_time == TIME_LIMIT) {
     pcb[current_pid].state = READY;
     EnQ(current_pid, &ready_q);
     current_pid = 0;
   }
+  // while size of q in not empty
 
+	
   outportb(0x20, 0x60);
+}
+
+void GetPidHandler(void) {
+		pcb[current_pid].TF_p->eax = current_pid; 
+		outportb(0x20, 0x60);
+}
+
+void SleepHandler(void) {
+		pcb[current_pid].wake_time = current_time + (100*pcb[current_pid].TF_p->eax);
+		pcb[current_pid].state = SLEEP;
+		current_pid = 0;
+		outportb(0x20, 0x60);
 }
