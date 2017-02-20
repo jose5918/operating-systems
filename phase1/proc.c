@@ -1,12 +1,11 @@
-// Done (I think)
 // proc.c, 159
 // all processes are coded here
 // processes do not use kernel space (data.h) or code (handlers, tools, etc.)
 // all must be done thru system service calls
 
-#include "proc.h"   // prototypes of processes
-#include "data.h"   // current_pid needed below
 #include "spede.h"  // cons_printf below needs
+#include "data.h"   // current_pid needed below
+#include "proc.h"   // prototypes of processes
 
 // Init PID 1, always ready to run, never preempted
 void Init(void) {

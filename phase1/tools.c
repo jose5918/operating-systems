@@ -1,8 +1,8 @@
 // tools.c, 159
 
-#include "data.h"
 #include "spede.h"
 #include "types.h"
+#include "data.h"
 
 // clear DRAM data blocks by filling zeroes
 void MyBzero(char *p, int size) {

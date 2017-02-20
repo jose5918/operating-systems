@@ -1,11 +1,11 @@
 // handlers.c, 159
 
+#include "spede.h"
+#include "types.h"
 #include "handlers.h"
+#include "tools.h"
 #include "data.h"
 #include "proc.h"
-#include "spede.h"
-#include "tools.h"
-#include "types.h"
 
 // to create process, alloc PID, PCB, and stack space
 // build TF into stack, set PCB, register PID to ready_q
@@ -28,7 +28,8 @@ void NewProcHandler(func_ptr_t p) {  // arg: where process code starts
 
   // point TF_p to highest area in the stack (but has space for a TF)
   pcb[pid].TF_p = (TF_t *)&proc_stack[pid][PROC_STACK_SIZE];
-  pcb[pid].TF_p->eip = (int)p;
+  pcb[pid].TF_p--;
+  pcb[pid].TF_p->eip = (unsigned int)p;
   pcb[pid].TF_p->eflags = EF_DEFAULT_VALUE | EF_INTR;
 
   // functions from spede/machine/proc_reg.h

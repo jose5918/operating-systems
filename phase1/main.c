@@ -56,9 +56,7 @@ int main() {
   // Init passed as function pointer
   NewProcHandler(Init);
   // call Scheduler() to select current_pid (will be 1)
-  current_pid = 1;  // shouldn't this be 0?
-                    // or maybe scheduler should check for 1
-                    // or I might just be crazy
+  current_pid = 0;  
   Scheduler();
   // call Loader with the TF address of current_pid
   Loader(pcb[current_pid].TF_p);
