@@ -1,0 +1,6 @@
+*~
+*.o
+*.RC
+*.orig
+Make
+*.dli
