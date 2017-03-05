@@ -33,11 +33,11 @@ void Vehicle(void){
 	my_pid = GetPid();
 
 	while(1){
-	ch_p[my_pid*80+45] = 0xf00 + 'f';
-	for(i = 0; i < LOOP; i++) asm("inb $0x80");
-	SemWait(vehicle_sid);
-	ch_p[my_pid*80+45] = 0xf00 + 'o';
-	Sleep(1);
-	SemPost(vehicle_sid);
+		ch_p[my_pid*80+45] = 0xf00 + 'f';
+		for(i = 0; i < LOOP; i++) asm("inb $0x80");
+		SemWait(vehicle_sid);
+		ch_p[my_pid*80+45] = 0xf00 + 'o';
+		Sleep(1);
+		SemPost(vehicle_sid);
 	}
 }

@@ -16,8 +16,9 @@ pcb_t pcb[PROC_NUM];  // process control blocks
 char proc_stack[PROC_NUM][PROC_STACK_SIZE];  // process runtime stacks
 int current_time;
 sem_t sem[Q_SIZE];
-unsigned short *ch_p;
+unsigned short *ch_p = 0xB8000;
 int vehicle_sid;
+char buffer[3];
 void Scheduler() {               // choose a PID as current_pid to load/run
   if (current_pid != 0) return;  // if continue below, find one for current_pid
 
@@ -28,6 +29,9 @@ void Scheduler() {               // choose a PID as current_pid to load/run
 
   current_pid = DeQ(&ready_q);
   pcb[current_pid].state = RUN;  // from RUN
+  ch_p[current_pid*80+43] =0xf00 + 'R';
+  itoa(current_pid,buffer);
+  ch_p[current_pid*80+41] =0xf00 + buffer;
   pcb[current_pid].cpu_time = 0;
 }
 
@@ -41,14 +45,14 @@ int main() {
 	current_pid = 0;  
   // use tool function MyBzero to clear the two PID queues
   MyBzero((char *)&free_q, sizeof(q_t));
-  MyBzero((char *)&sem, sizeof(sem_t));
+  MyBzero((char *)&sem[0], sizeof(sem_t)*Q_SIZE);
   MyBzero((char *)&ready_q, sizeof(q_t));
   vehicle_sid = -1;
   // queue free queue with PID 1~19
   for (i = 1; i < Q_SIZE; i++) {
     EnQ(i, &free_q);
   }
-    for (i = 0; i < Q_SIZE; i++) {
+    for (i = 1; i < Q_SIZE; i++) {
     EnQ(i, &aval_sem_id);
   }
 
@@ -96,13 +100,13 @@ void Kernel(TF_t *TF_p) {  // kernel code exec (at least 100 times/second)
 			SleepHandler();
 			break;
     case SEMALLOC_EVENT:
-    	SemAllocHandler(5);
+    	TF_p->ebx=SemAllocHandler(TF_p->eax);
 	break;
     case SEMWAIT_EVENT:
-    	SemWaitHandler(vehicle_sid);
+    	SemWaitHandler(TF_p->eax);
 	break;   	
     case SEMPOST_EVENT:
-    	SemPostHandler(vehicle_sid);
+    	SemPostHandler(TF_p->eax);
 	break;   	
    	
     default:

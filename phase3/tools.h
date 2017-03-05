@@ -8,6 +8,6 @@
 void MyBzero(char *, int);
 int DeQ(q_t *);
 void EnQ(int, q_t *);
-
+void itoa(int,char []);
 #endif
 

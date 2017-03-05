@@ -6,7 +6,6 @@
 #include "tools.h"
 #include "data.h"
 #include "proc.h"
-
 // to create process, alloc PID, PCB, and stack space
 // build TF into stack, set PCB, register PID to ready_q
 void NewProcHandler(func_ptr_t p) {  // arg: where process code starts
@@ -24,6 +23,7 @@ void NewProcHandler(func_ptr_t p) {  // arg: where process code starts
   MyBzero((char *)&pcb[pid], PROC_STACK_SIZE);
   // Process state now READY
   pcb[pid].state = READY;
+  
   EnQ(pid, &ready_q);
 
   // point TF_p to highest area in the stack (but has space for a TF)
@@ -49,6 +49,7 @@ void TimerHandler(void) {
 	for(i = 0; i < PROC_NUM ; i++){
 		if(pcb[i].state == SLEEP && pcb[i].wake_time == current_time){
 			pcb[i].state = READY;		
+			ch_p[current_pid*80+43] = 0xf00 + 'r';
 			EnQ(i, &ready_q);
 		}
 	}			
@@ -57,6 +58,7 @@ void TimerHandler(void) {
 
 	if (pcb[current_pid].cpu_time == TIME_LIMIT) {
     pcb[current_pid].state = READY;
+    ch_p[current_pid*80+45] = 0xf00 + 'r';
     EnQ(current_pid, &ready_q);
     current_pid = 0;
   }
@@ -74,6 +76,7 @@ void GetPidHandler(void) {
 void SleepHandler(void) {
 		pcb[current_pid].wake_time = current_time + (100*pcb[current_pid].TF_p->eax);
 		pcb[current_pid].state = SLEEP;
+		ch_p[current_pid*80+43] = 0xf00 + 's';
 		current_pid = 0;
 		outportb(0x20, 0x60);
 }
@@ -81,9 +84,11 @@ void SleepHandler(void) {
 void SemWaitHandler(int sem_id){
 	if (sem[sem_id].passes > 0){
 		sem[sem_id].passes -= 1;
+		ch_p[current_pid*80+40] = 0xf00 + sem[sem_id].passes+30;
 
 	}else{
 		pcb[current_pid].state = WAIT;
+		ch_p[current_pid*80+43] = 0xf00 + 'w';
 		EnQ(current_pid, &(sem[sem_id].wait_q));
 		current_pid = 0;
 	}
@@ -94,21 +99,26 @@ int SemAllocHandler(int passes){
 	int sem_id = -1;
 	if (aval_sem_id.size!=0){
 		sem_id = DeQ(&aval_sem_id);
+		ch_p[current_pid*80+40] = 0xf00 + passes+30;
 		sem[sem_id].passes = passes;
 		sem[sem_id].owner = sem_id;
 		MyBzero((char *)&(sem[sem_id].wait_q),sizeof(q_t));
 		
 	}
 
+	pcb[current_pid].TF_p->eax=sem_id;
 	return sem_id;
 }
 void SemPostHandler(int sem_id){
 	if (sem[sem_id].wait_q.size>0){
 		int temp = DeQ(&(sem[sem_id].wait_q));
 		pcb[temp].state = READY;
+		ch_p[current_pid*80+43] = 0xf00 + 'r';
 		EnQ(temp, &ready_q);
 	}else{
 		sem[sem_id].passes += 1;
+		ch_p[current_pid*80+40] = 0xf00 + sem[sem_id].passes+30;
+		
 	}
   outportb(0x20, 0x60);
 

@@ -15,4 +15,5 @@ extern int current_time;	    // count of timer events
 extern sem_t sem[Q_SIZE];
 extern unsigned short *ch_p;
 extern int vehicle_sid;
+extern char buffer[3];
 #endif // ifndef __DATA_H__         ('name-mangling' prevention)
