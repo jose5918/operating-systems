@@ -9,7 +9,7 @@
 #define PROC_STACK_SIZE 4096 // process runtime stack in bytes
 
 
-#define RT_NUM 3        // 3 extra serial ports: COM2/3/4
+#define PORT_NUM 3        // 3 extra serial ports: COM2/3/4
 #define BUFF_SIZE 101     // 100 data char + delimiter null char
 #define TIME_LIMIT 10   // Fast process switch scheduling
 
@@ -75,4 +75,4 @@ typedef struct {
        loopback_q;           // loopback buffer
 } port_t;
 
-# //endif __TYPES_H__
+#endif //__TYPES_H__

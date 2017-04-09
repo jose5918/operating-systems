@@ -77,10 +77,15 @@ int main() {
  fill_gate(&IDT_p[PORTALLOC_EVENT], (int)PortAllocEvent, get_cs(), ACC_INTR_GATE, 0);
  fill_gate(&IDT_p[PORTWRITE_EVENT], (int)PortWriteEvent, get_cs(), ACC_INTR_GATE, 0);
  fill_gate(&IDT_p[PORTREAD_EVENT], (int)PortReadEvent, get_cs(), ACC_INTR_GATE, 0);
+// TODO add support for two terminals
 
   outportb(0x21, ~9);
 
   NewProcHandler(Init);
+  NewProcHandler(TermProc);
+  for(i = 0; i<PORT_NUM; i++){
+    port[i].owner = 0;
+  }
 
   Scheduler();
 
