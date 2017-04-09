@@ -146,3 +146,114 @@ void SysPrintHandler(char *p){
         p++;
     }
 }
+void PortWriteOne(int port_num){
+	char one;
+	if (port[port_num].write_q.size == 0 && port[port_num].loopback_q.size == 0){
+		port[port_num].write_ok = 1;
+		return;
+	}
+	
+	if (port[port_num].loopback_q.size > 0){
+		one = DeQ(&(port[port_num].loopback_q));
+	}else{
+		one = DeQ(&(port[port_num].write_q));
+		SemPostHandler(port[port_num].write_sid);
+	}
+	outportb(port[port_num].IO+DATA, one);
+	port[port_num].write_ok = 0;
+}
+void PortReadOne(int port_num){
+	char one;
+	one = inportb(DATA)
+	
+	if (port[port_num].read_q.size == Q_SIZE){
+		cons_printf("Kernel Panic: your typing on terminal is super fast!\n");
+        return;
+	}
+	
+	EnQ(one,&(port[port_num].read_q));
+	EnQ(one,&(port[port_num].loopback_q));
+	
+	if (one == "\r"){
+		EnQ("\n",&(port[port_num].loopback_q);
+	}
+	
+	SemPostHandler(port[port_num].read_sid);	
+}
+void PortHandler(void){
+	int port_num, intr_type;
+	intr_type = inportb(IIR); // Not sure
+	if (intr_type == IIR_RXRDY){
+		PortReadOne(port_num);
+	}
+	if (intr_type == IIR_RXRDY){
+		PortWriteOne(port_num);
+	}
+	if (port[1].write_ok == 1){
+		PortWriteOne(port_num);
+	}
+	
+	//outportb(); Not sure
+}
+void PortAllocHandler(int *eax){
+	int port_num, baud_rate, divisor, i, port_found;
+	static int IO[PORT_NUM] = { 0x2f8, 0x3e8, 0x2e8 };
+	port_found = 0
+	for(i = 0; i < PORT_NUM - 1; i++) {
+        if (port[i].owner == 0){
+			port_num = i;
+			port_found = 1;
+			break;
+		}  
+    }
+	
+	if (port_found == 0){
+		cons_printf("Kernel Panic: no port left!\n");
+	}
+	//[TODO]
+	//write port_num at where eax point to // service call can return it
+	//call MyBzero to clear the allocated port data
+	
+	port[port_num].owner = current_pid;
+	port[port_num].IO = &IO // wrong
+	port[port_num].write_ok = 1;
+	
+	//[TODO]
+	baud_rate = 9600;
+      divisor = 115200 / baud_rate;                        // time period of each baud
+      outportb(port[port_num].IO+CFCR, CFCR_DLAB);         // CFCR_DLAB is 0x80
+      call outportb to set its BAUDLO to LOBYTE(divisor)
+      call outportb to set its BAUDHI to HIBYTE(divisor)
+      call outportb to set its CFCR to CFCR_PEVEN|CFCR_PENAB|CFCR_7BITS
+      call outportb to set its IER to 0
+      call outportb to set its MCR to MCR_DTR|MCR_RTS|MCR_IENABLE
+      asm("inb $0x80");                                     // let port have react time
+      call outportb to set its IER to IER_ERXRDY|IER_ETXRDY // enable TX/RX event types
+   } // end PortAllocHandler...
+
+void PortWriteHandler(char one, int port_num) { // to buffer one, actually
+    if (port[port_num].write_q.size == Q_SIZE){
+        cons_printf("Kernel Panic: terminal is not prompting (fast enough)?\n");
+        return;
+	}
+    
+	EnQ(one, &(port[port_num].write_q));   
+	// buffer one
+	if (port[port_num].write_ok == 1){
+		PortWriteOne(port_num);
+	}
+}
+
+void PortReadHandler(char *one, int port_num) { // to read from buffer, actually
+    if (port[port_num].read_q.size == 0){
+        cons_printf("Kernel Panic: nothing in typing/read buffer?\n");
+        return;
+	}
+	//[TODO]
+      write at where one points to with the character dequeued from read_q
+   } // end PortReadHandler
+
+	
+	
+	
+	
