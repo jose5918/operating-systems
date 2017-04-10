@@ -42,7 +42,7 @@ void TermProc(void) {
   char str_read[BUFF_SIZE]; // size 101
   my_port = PortAlloc(); // init port device and port_t data associated
   while(1) {
-      PortWrite("Hello, World! Team xxx here!\n\r", my_port);
+      PortWrite("Hello, World! Team Clang here!\n\r", my_port);
       PortWrite("Now enter: ", my_port);
       PortRead(str_read, my_port);
       cons_printf("Read from port #%d: %s\n", my_port, str_read);

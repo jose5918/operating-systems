@@ -190,10 +190,10 @@ void PortHandler(void){
     if (intr_type == IIR_RXRDY){
       PortReadOne(port_num);
     }
-    if (intr_type == IIR_RXRDY){
+    if (intr_type == IIR_TXRDY){
       PortWriteOne(port_num);
     }
-    if (port[1].write_ok == 1){
+    if (port[port_num].write_ok == 1){
       PortWriteOne(port_num);
     }
   }
@@ -219,7 +219,7 @@ void PortAllocHandler(int *eax){
     return;
 	}
 	//write port_num at where eax point to // service call can return it
-  pcb[current_pid].TF_p->eax = port_num;
+  *eax = port_num;
 	//call MyBzero to clear the allocated port data
   MyBzero((char *)&port[port_num],sizeof(port_t));
 
@@ -231,9 +231,7 @@ void PortAllocHandler(int *eax){
   divisor = 115200 / baud_rate;
   outportb(port[port_num].IO+CFCR, CFCR_DLAB);
   outportb(port[port_num].IO+BAUDLO, LOBYTE(divisor));
-  outportb(port[port_num].IO+BAUDLO, HIBYTE(divisor));
-
-  outportb(port[port_num].IO+BAUDLO, HIBYTE(divisor));
+  outportb(port[port_num].IO+BAUDHI, HIBYTE(divisor));
   outportb(port[port_num].IO+CFCR, CFCR_PEVEN|CFCR_PENAB|CFCR_7BITS);
   outportb(port[port_num].IO+IER, 0);
   outportb(port[port_num].IO+MCR, MCR_DTR|MCR_RTS|MCR_IENABLE);
