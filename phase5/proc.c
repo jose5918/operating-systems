@@ -6,23 +6,10 @@
 
 void Init(void) {
   int i;
-  char key;
 
-  while (1) {
-    if (cons_kbhit()) {
-      key = cons_getchar();
-      switch (key) {
-        case 'p':
-            SysPrint(" Hello, World! Team Clang: Jose Aguirre and Ahriben Gonzalez\n\r");
-          break;
-        case 'b':
-          breakpoint();
-      }
-    }
     for (i = 0; i < LOOP; i++) {
       asm("inb $0x80");
     }
-  }
 
 }
 

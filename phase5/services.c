@@ -1,3 +1,5 @@
+#include "data.h"
+
 int GetPid(void) {  
       int pid;
       asm("pushl %%eax;

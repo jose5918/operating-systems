@@ -166,7 +166,7 @@ void PortWriteOne(int port_num){
 
 void PortReadOne(int port_num){
 	char one;
-	one = inportb(port[port_num].IO + DATA)
+	one = inportb(port[port_num].IO + DATA);
 	
 	if (port[port_num].read_q.size == Q_SIZE){
 		cons_printf("Kernel Panic: your typing on terminal is super fast!\n");
@@ -176,8 +176,8 @@ void PortReadOne(int port_num){
 	EnQ(one,&(port[port_num].read_q));
 	EnQ(one,&(port[port_num].loopback_q));
 	
-	if (one == "\r"){
-		EnQ("\n",&(port[port_num].loopback_q));
+	if (one == '\r'){
+		EnQ('\n',&(port[port_num].loopback_q));
 	}
 	
 	SemPostHandler(port[port_num].read_sid);	
@@ -205,7 +205,7 @@ void PortHandler(void){
 void PortAllocHandler(int *eax){
 	int port_num, baud_rate, divisor, i, port_found;
 	static int IO[PORT_NUM] = { 0x2f8, 0x3e8, 0x2e8 };
-	port_found = 0
+	port_found = 0;
 	for(i = 0; i < PORT_NUM; i++) {
       if (port[i].owner == 0){
 			  port_num = i;
