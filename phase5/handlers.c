@@ -20,8 +20,8 @@ void NewProcHandler(func_ptr_t p) {
   MyBzero((char *)&pcb[pid], PROC_STACK_SIZE);
 
   pcb[pid].state = READY;
-  if (current_pid != 0){
-    ch_p[current_pid*80+43] =0xf00 + 'r';
+  if (pid != 0){
+    ch_p[pid*80+43] =0xf00 + 'r';
   }
   EnQ(pid, &ready_q);
 
@@ -46,7 +46,7 @@ void TimerHandler(void) {
  for(i = 0; i < PROC_NUM ; i++){
   if(pcb[i].state == SLEEP && pcb[i].wake_time == current_time){
    pcb[i].state = READY;
-      ch_p[current_pid*80+43] =0xf00 + 'r';
+      ch_p[i*80+43] =0xf00 + 'r';
    EnQ(i, &ready_q);
   }
  }
@@ -104,7 +104,7 @@ void SemPostHandler(int sid){
     if (sem[sid].wait_q.size > 0){
       process_number=DeQ(&(sem[sid].wait_q));
       pcb[process_number].state = READY;
-      ch_p[current_pid*80+43] =0xf00 + 'r';
+      ch_p[process_number*80+43] =0xf00 + 'r';
       EnQ(process_number,&ready_q);
       return;
     }

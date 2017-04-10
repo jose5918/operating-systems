@@ -120,10 +120,10 @@ void Kernel(TF_t *TF_p) {
       SemAllocHandler(TF_p->eax);
       break;
     case SEMWAIT_EVENT:
-      SemWaitHandler(vehicle_sid);
+      SemWaitHandler(TF_p->eax);
       break;
     case SEMPOST_EVENT:
-      SemPostHandler(vehicle_sid);
+      SemPostHandler(TF_p->eax);
       break;
     case GETPID_EVENT:
       GetPidHandler();
