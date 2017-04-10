@@ -146,3 +146,117 @@ void SysPrintHandler(char *p){
         p++;
     }
 }
+
+void PortWriteOne(int port_num){
+	char one;
+	if (port[port_num].write_q.size == 0 && port[port_num].loopback_q.size == 0){
+		port[port_num].write_ok = 1;
+		return;
+	}
+	
+	if (port[port_num].loopback_q.size > 0){
+		one = DeQ(&(port[port_num].loopback_q));
+	}else{
+	  one = DeQ(&(port[port_num].write_q));
+		SemPostHandler(port[port_num].write_sid);
+	}
+	outportb(port[port_num].IO+DATA, one);
+	port[port_num].write_ok = 0;
+}
+
+void PortReadOne(int port_num){
+	char one;
+	one = inportb(port[port_num].IO + DATA)
+	
+	if (port[port_num].read_q.size == Q_SIZE){
+		cons_printf("Kernel Panic: your typing on terminal is super fast!\n");
+    return;
+	}
+	
+	EnQ(one,&(port[port_num].read_q));
+	EnQ(one,&(port[port_num].loopback_q));
+	
+	if (one == "\r"){
+		EnQ("\n",&(port[port_num].loopback_q));
+	}
+	
+	SemPostHandler(port[port_num].read_sid);	
+}
+
+void PortHandler(void){
+	int port_num, intr_type;
+  for (port_num = 0; port_num < PORT_NUM; port_num++){
+    intr_type = inportb(port[port_num].IO + IIR);
+    if (intr_type == IIR_RXRDY){
+      PortReadOne(port_num);
+    }
+    if (intr_type == IIR_RXRDY){
+      PortWriteOne(port_num);
+    }
+    if (port[1].write_ok == 1){
+      PortWriteOne(port_num);
+    }
+  }
+	
+	outportb(0x20,0x63); //IRQ3
+  //outportb(0x20, 0x64); IRQ4
+}
+
+void PortAllocHandler(int *eax){
+	int port_num, baud_rate, divisor, i, port_found;
+	static int IO[PORT_NUM] = { 0x2f8, 0x3e8, 0x2e8 };
+	port_found = 0
+	for(i = 0; i < PORT_NUM; i++) {
+      if (port[i].owner == 0){
+			  port_num = i;
+			  port_found = 1;
+			  break;
+      }
+  }
+	
+	if (port_found == 0){
+		cons_printf("Kernel Panic: no port left!\n");
+    return;
+	}
+	//write port_num at where eax point to // service call can return it
+  pcb[current_pid].TF_p->eax = port_num;
+	//call MyBzero to clear the allocated port data
+  MyBzero((char *)&port[port_num],sizeof(port_t));
+
+	port[port_num].owner = current_pid;
+	port[port_num].IO = IO[port_num];
+	port[port_num].write_ok = 1;
+	
+	baud_rate = 9600;
+  divisor = 115200 / baud_rate;
+  outportb(port[port_num].IO+CFCR, CFCR_DLAB);
+  outportb(port[port_num].IO+BAUDLO, LOBYTE(divisor));
+  outportb(port[port_num].IO+BAUDLO, HIBYTE(divisor));
+
+  outportb(port[port_num].IO+BAUDLO, HIBYTE(divisor));
+  outportb(port[port_num].IO+CFCR, CFCR_PEVEN|CFCR_PENAB|CFCR_7BITS);
+  outportb(port[port_num].IO+IER, 0);
+  outportb(port[port_num].IO+MCR, MCR_DTR|MCR_RTS|MCR_IENABLE);
+  asm("inb $0x80");
+  outportb(port[port_num].IO+IER, IER_ERXRDY|IER_ETXRDY);
+} 
+
+void PortWriteHandler(char one, int port_num) { // to buffer one, actually
+  if (port[port_num].write_q.size == Q_SIZE){
+        cons_printf("Kernel Panic: terminal is not prompting (fast enough)?\n");
+        return;
+	}
+    
+	EnQ(one, &(port[port_num].write_q));   
+	if (port[port_num].write_ok == 1){
+		PortWriteOne(port_num);
+	}
+}
+
+void PortReadHandler(char *one, int port_num) { // to read from buffer, actually
+  if (port[port_num].read_q.size == 0){
+        cons_printf("Kernel Panic: nothing in typing/read buffer?\n");
+        return;
+	}
+      *one = DeQ(&(port[port_num].read_q));
+} 

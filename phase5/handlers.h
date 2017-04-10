@@ -13,5 +13,9 @@ void SemAllocHandler(int);
 void SemWaitHandler(int);
 void SemPostHandler(int);
 void SysPrintHandler(char *);
+void PortHandler(void);
+void PortAllocHandler(int *);
+void PortWriteHandler(char, int);
+void PortReadHandler(char *, int);
 
 #endif
