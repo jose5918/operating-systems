@@ -17,4 +17,14 @@ extern unsigned short *ch_p;           // to check processes and a semaphore
 extern int vehicle_sid;
 extern port_t port[PORT_NUM];
 
+/////////////////////////////////////// phase6 file services
+extern char help_txt_data[];
+extern char note_txt_data[];
+extern char index_html_data[];
+extern char hello_html_data[];
+extern dir_t bin_dir[4];
+extern dir_t www_dir[8];
+extern dir_t root_dir[11];
+extern fd_t fd_array[MAX_FD];
+
 #endif // ifndef __DATA_H__         ('name-mangling' prevention)

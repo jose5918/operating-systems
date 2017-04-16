@@ -17,5 +17,14 @@ void PortHandler(void);
 void PortAllocHandler(int *);
 void PortWriteHandler(char, int);
 void PortReadHandler(char *, int);
+void FSfindHandler(void);
+void FSopenHandler(void);
+void FSreadHandler(void);
+int FScanAccessFD(int, int);
+int FSallocFD(int);
+dir_t *FSfindName(char *);
+dir_t *FSfindNameSub(char *, dir_t *);
+void FSdir2attr(dir_t *, attr_t *);
+void FScloseHandler(void);
 
 #endif

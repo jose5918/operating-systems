@@ -3,6 +3,8 @@
 #ifndef __TYPES_H__
 #define __TYPES_H__
 
+#include "FStypes.h"
+
 #define LOOP 1666667         // handly loop limit exec asm("inb $0x80");
 #define PROC_NUM 20          // max number of processes
 #define Q_SIZE 20            // queuing capacity
