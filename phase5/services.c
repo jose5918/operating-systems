@@ -126,5 +126,6 @@ void PortRead(char *p, int port_num) { // to read terminal KB
          //break loop if size reaching BUFF_SIZE-1
          if (size == BUFF_SIZE-1) break;
 	}
-	*p = '\0';  // null-terminate str, overwirte \r
+	*p = '\0';  // null-terminate str, overwrite \r
 }
+
