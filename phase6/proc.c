@@ -2,6 +2,7 @@
 #include "data.h"
 #include "proc.h"
 #include "services.h"
+#include "tools.h"
 
 
 void Init(void) {
@@ -40,7 +41,7 @@ void Vehicle(void) {
 
 void TermProc(void) {
 	int i, len, my_port;
-	char login_str[BUFF_SIZE], passwd_str[BUFF_SIZE],cmd_str[BUFF_SIZE];
+	char login_str[BUFF_SIZE], passwd_str[BUFF_SIZE],cmd_str[BUFF_SIZE], cwd[BUFF_SIZE];
 	char exit_str[] = "exit";
 	char pwd_str[] = "pwd";
 	char cd_str[] = "cd ";
@@ -57,7 +58,7 @@ void TermProc(void) {
 				PortWrite("Password: ", my_port);
 				PortRead(passwd_str, my_port);
 				if (MyStrlen(passwd_str) == MyStrlen(login_str)){
-					if (MyStrcmp(MyStrReverse(passwd_str),login_str,MyStrlen(login_str)){
+					if (MyStrcmp(MyStrReverse(passwd_str),login_str,MyStrlen(login_str))){
 						cwd[0] = '/';
 						break;
 					}
@@ -72,13 +73,13 @@ void TermProc(void) {
 					break;
 				}
 				if (MyStrcmp(cmd_str,pwd_str,4)){
-					PortWrite(cwd_str, my_port);
+					PortWrite(cwd, my_port);
 				}else if (MyStrcmp(cmd_str,cd_str,3)){
-					TermCd(name, cwd, my_port);//[TODO]
+					TermCd(&cmd_str[3], cwd, my_port);//[TODO]
 				}else if (MyStrcmp(cmd_str,ls_str,3)){
 					TermLs(cwd,my_port);
 				}else if (MyStrcmp(cmd_str,cat_str,4)){
-					TermCat(name, cwd, my_port);//[TODO]
+					TermCat(&cmd_str[4], cwd, my_port);//[TODO]
 				}
 			}
 		}

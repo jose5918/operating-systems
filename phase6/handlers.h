@@ -21,5 +21,10 @@ void FSfindHandler(void);
 void FSopenHandler(void);
 void FSreadHandler(void);
 void FScloseHandler(void);
+int FScanAccessFD(int, int);
+int FSallocFD(int);
+dir_t *FSfindName(char *);
+dir_t *FSfindNameSub(char *, dir_t *);
+void FSdir2attr(dir_t *, attr_t *);
 
 #endif

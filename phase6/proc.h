@@ -7,5 +7,9 @@ void Init(void);      // PID 1, eternal, never preempted
 void UserProc(void);  // PID 2, 3, ...
 void Vehicle(void);
 void TermProc(void);
+void TermCd(char *, char *, int);
+void TermCat(char *, char *, int);
+void TermLs(char *, int);
+void Attr2Str(attr_t *, char *);
 
 #endif
