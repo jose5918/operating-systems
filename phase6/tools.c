@@ -27,3 +27,54 @@ void EnQ(int data, q_t *p) {
   p->q[p->size] = data;
   p->size++;
 }
+int MyStrlen(char *p){
+	int len = 0;
+	while( p[len++] != '\0');
+	return len;
+}
+
+
+void MyStrcat(char *dst, char *addendum){
+	int i,j;
+	i = MyStrlen(dst);
+	for( j = 0; addendum[j]!='\0';j++){
+		dst[i] = addendum[j];
+		i++;
+	}
+	dst[i] = '\0';
+}
+int MyStrcmp(char *p, char *q, int len){
+	int i,p_len,q_len;
+	p_len = MyStrlen(p);
+	q_len = MyStrlen(q);
+	if (p_len < len || q_len < len){
+		printf("Cant be compared to len");
+		return 0;
+	}
+	for( i = 0; i <len; i++){
+		if (p[i] == q[i]){
+			continue;
+		}else{
+			return 0;
+		}
+	}
+}
+void MyStrcpy(char *dst, char *src) {
+	int i,j;
+	i = MyStrlen(dst)
+	 char ch;
+      ch = *src;
+      while(ch != '\0') {
+         *dst = ch;
+         dst++;
+         src++;
+         ch = *src;
+      }
+      *dst = '\0';
+}
+void MyMemcpy(char *dst, char *src, int size){
+	int i;
+	for( i = 0; i <size; i++){
+		dst[i] = src[i];
+	}
+}
