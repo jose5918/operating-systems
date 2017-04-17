@@ -78,3 +78,14 @@ void MyMemcpy(char *dst, char *src, int size){
 		dst[i] = src[i];
 	}
 }
+char MyStrReversse(char *p){
+	int i,j,temp;
+	j = MyStrlen(dst) - 1;
+	i = 0;
+	while ( i < j){
+		temp = i;
+		i = j;
+		j = temp;
+	}
+	return p;
+}
