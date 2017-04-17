@@ -123,3 +123,61 @@ void PortRead(char *p, int port_num) { // to read terminal KB
 	}
 	*p = '\0';  // null-terminate str, overwirte \r
 }
+
+void FSfind(char *name, char *cwd, char *data) {
+    char tmp[BUFF_SIZE];
+    MyStrcpy(tmp, cwd);
+    MyStrcat(tmp, name);
+    asm("pushl %%eax;
+         pushl %%ebx;
+         movl %0, %%eax;
+         movl %1, %%ebx;
+         int $109;
+         popl %%ebx;
+         popl %%eax;"
+        :
+        : "g" ((int)tmp), "g" ((int)data)
+        );
+}
+
+int FSopen(char *name, char *cwd){
+    char tmp[BUFF_SIZE];
+    int fd_num;
+    MyStrcpy(tmp, cwd);
+    MyStrcat(tmp, name);
+    asm("pushl %%eax;
+         pushl %%ebx;
+         movl %1, %%eax;
+         int $110;
+         movl %%ebx, %0;
+         popl %%ebx;
+         popl %%eax;"
+        : "=g" (fd_num)
+        : "g" ((int)tmp)
+    );
+    return fd_num;
+}
+
+
+void FSread(int fd, char *data){
+    asm("pushl %%eax;
+         pushl %%ebx;
+         movl %0, %%eax;
+         movl %1, %%ebx;
+         int $111;
+         popl %%ebx;
+         popl %%eax;"
+        :
+        : "g" (fd), "g" ((int)data)
+        );
+}
+
+void FSclose(int fd){
+    asm("pushl %%eax;
+         movl %0, %%eax;
+         int $112;
+         popl %%eax;"
+        :
+        : "g" (fd)
+        );
+}
