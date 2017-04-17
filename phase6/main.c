@@ -124,6 +124,18 @@ void Kernel(TF_t *TF_p) {
     case PORTALLOC_EVENT:
       PortAllocHandler(&(TF_p->eax));
       break;
+    case FSREAD_EVENT:
+      FSreadHandler();
+      break;
+    case FSFIND_EVENT:
+      FSfindHandler();
+      break;
+    case FSOPEN_EVENT:
+      FSopenHandler();
+      break;
+    case FSCLOSE_EVENT:
+      FScloseHandler();
+      break;
     case SYSPRINT_EVENT:
       SysPrintHandler((char *)TF_p->eax);
       break;
