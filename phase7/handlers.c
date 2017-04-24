@@ -490,3 +490,25 @@ void FScloseHandler(void) {
    if (FScanAccessFD(fd, current_pid))fd_array[fd].owner = 0;
    else  cons_printf("FScloseHandler: cannot close FD!\n");
 }
+void ExitHandler(int exit_num){
+int ppid, *exit_num_p, page_index;
+
+if (pcb[ppid].state != WAIT){
+pcb[current_pid].state = ZOMBIE;
+current_pid = 0;
+return;
+}
+else{
+pcb[ppid].state = FREE;
+EnQ(current_pid, &free_q);//not sure
+exit_num_p = (int *) pcb[ppid].TF->eax;
+}
+for(page_index = 0; page_index < MEM_PAGE;page_index++){
+if(mem_page[page_index].owner == exit_num){
+mem_page[page_index]=0;
+}
+}
+EnQ(exit_num, &free_q);//not sure
+pcb[exit_NUM].state = FREE;
+current_pid = 0;
+}
