@@ -548,12 +548,12 @@ void WaitHandler(int *exit_num_p){
     current_pid = 0;
     return;
   }
-  *exit_num_p = pcb[child_pid].TF_p->eax; //is this current_pid?
+  *exit_num_p = pcb[current_pid].TF_p->eax;
   EnQ(child_pid, &free_q);
   pcb[child_pid].state = FREE;
   for(page_index; page_index < MEM_PAGE_NUM; page_index++){
     if (mem_page[page_index].owner == child_pid){
-      mem_page[page_inex].owner = 0;
+      mem_page[page_index].owner = 0;
     }
   }
   
@@ -561,4 +561,25 @@ void WaitHandler(int *exit_num_p){
 
 void ExitHandler(int exit_num) {
   int ppid, *exit_num_p, page_index;
+  ppid = pcb[current_pid].ppid;
+
+  if (pcb[ppid].state != WAIT){
+    pcb[current_pid].state = ZOMBIE;
+    current_pid = 0;
+    return;
+  } else{
+    pcb[ppid].state = READY;
+    EnQ(ppid, &read_q);
+    exit_num_p = (int *) pcb[ppid].TF->eax;
+    *exit_num_p = exit_num;
+  }
+  for(page_index = 0; page_index < MEM_PAGE_NUM; page_index++){
+    if(mem_page[page_index].owner == current_pid){
+      mem_page[page_index].owner=0;
+    }
+  }
+
+  EnQ(current_pid, &free_q);
+  pcb[current_pid].state = FREE;
+  current_pid = 0;
 }
