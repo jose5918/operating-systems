@@ -29,7 +29,7 @@ void EnQ(int data, q_t *p) {
 }
 int MyStrlen(char *p){
 	int len = 0;
-	while( p[len++] != '\0');
+	while( p[len] != '\0'){len++;}
 	return len;
 }
 
@@ -44,13 +44,7 @@ void MyStrcat(char *dst, char *addendum){
 	dst[i] = '\0';
 }
 int MyStrcmp(char *p, char *q, int len){
-	int i,p_len,q_len;
-	p_len = MyStrlen(p);
-	q_len = MyStrlen(q);
-	if (p_len < len || q_len < len){
-		printf("Cant be compared to len");
-		return 0;
-	}
+	int i;
 	for( i = 0; i <len; i++){
 		if (p[i] == q[i]){
 			continue;
@@ -58,34 +52,22 @@ int MyStrcmp(char *p, char *q, int len){
 			return 0;
 		}
 	}
+  return 1;
 }
 void MyStrcpy(char *dst, char *src) {
-	int i,j;
-	i = MyStrlen(dst)
-	 char ch;
-      ch = *src;
-      while(ch != '\0') {
-         *dst = ch;
-         dst++;
-         src++;
-         ch = *src;
-      }
-      *dst = '\0';
+	char ch;
+  ch = *src;
+  while(ch != '\0') {
+    *dst = ch;
+    dst++;
+    src++;
+    ch = *src;
+  }
+    *dst = '\0';
 }
 void MyMemcpy(char *dst, char *src, int size){
 	int i;
 	for( i = 0; i <size; i++){
 		dst[i] = src[i];
 	}
-}
-char MyStrReversse(char *p){
-	int i,j,temp;
-	j = MyStrlen(dst) - 1;
-	i = 0;
-	while ( i < j){
-		temp = i;
-		i = j;
-		j = temp;
-	}
-	return p;
 }
