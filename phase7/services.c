@@ -181,3 +181,41 @@ void FSclose(int fd){
         : "g" (fd)
         );
 }
+
+int Fork(char *p){
+    int child_pid;
+    asm("pushl %%eax;
+         pushl %%ebx;
+         movl %1, %%eax;
+         int $113;
+         movl %%ebx, %0;
+         popl %%ebx;
+         popl %%eax;"
+         : "=g" (child_pid)
+         : "g" ((int)p)
+    );
+    return child_pid;
+}
+
+int Wait(void){
+    int exit_num;
+    asm("pushl %%eax;
+         int $114;        
+         movl %%eax, %0;
+         popl %%eax"        
+         : "=g" (exit_num)         
+         :                    
+    );
+    return exit_num;
+
+}
+
+void Exit(int exit_num){
+	asm("pushl %%eax;
+         movl %0, %%eax;
+         int $115;  
+         popl %%eax;"
+        :
+		:"g" (exit_num)
+        );
+}

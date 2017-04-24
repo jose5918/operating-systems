@@ -26,5 +26,6 @@ extern dir_t bin_dir[4];
 extern dir_t www_dir[8];
 extern dir_t root_dir[11];
 extern fd_t fd_array[FD_NUM];
+extern mem_page_t mem_page[MEM_PAGE_NUM];
 
 #endif // ifndef __DATA_H__         ('name-mangling' prevention)

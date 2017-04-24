@@ -26,5 +26,8 @@ int FSallocFD(int);
 dir_t *FSfindName(char *);
 dir_t *FSfindNameSub(char *, dir_t *);
 void FSdir2attr(dir_t *, attr_t *);
+void ForkHandler(char *, int *);
+void WaitHandler(int *);
+void ExitHandler(int);
 
 #endif

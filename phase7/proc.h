@@ -11,5 +11,6 @@ void TermCd(char *, char *, int);
 void TermCat(char *, char *, int);
 void TermLs(char *, int);
 void Attr2Str(attr_t *, char *);
+int TermBin(char *, char *, int);
 
 #endif

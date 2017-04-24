@@ -23,6 +23,8 @@ int vehicle_sid;
 
 port_t port[PORT_NUM];
 
+mem_page_t mem_page[MEM_PAGE_NUM];
+
 void Scheduler() {
   if (current_pid != 0) return;
 
@@ -79,8 +81,18 @@ int main() {
  fill_gate(&IDT_p[FSREAD_EVENT], (int)FSreadEvent, get_cs(), ACC_INTR_GATE, 0);
  fill_gate(&IDT_p[FSCLOSE_EVENT], (int)FScloseEvent, get_cs(), ACC_INTR_GATE, 0);
 
+ //phase 7
+ fill_gate(&IDT_p[FORK_EVENT], (int)ForkEvent, get_cs(), ACC_INTR_GATE, 0);
+ fill_gate(&IDT_p[WAIT_EVENT], (int)WaitEvent, get_cs(), ACC_INTR_GATE, 0);
+ fill_gate(&IDT_p[EXIT_EVENT], (int)ExitEvent, get_cs(), ACC_INTR_GATE, 0);
+
   for(i = 0; i<FD_NUM-1; i++){
     fd_array[i].owner = 0;
+  }
+
+  for(i = 0; i<MEM_PAGE_NUM; i++){
+    mem_page[i].owner = 0;
+    mem_page[i].addr = MEM_BASE + (i*MEM_PAGE_SIZE);
   }
 
   root_dir[0].size = sizeof(root_dir);   // can only be assigned during runtime
@@ -153,6 +165,15 @@ void Kernel(TF_t *TF_p) {
       break;
     case SLEEP_EVENT:
       SleepHandler();
+      break;
+    case FORK_EVENT:
+      ForkHandler((char *)TF_p->eax, &(TF_p->ebx));
+      break;
+    case WAIT_EVENT:
+      WaitHandler(&(TF_p->eax));
+      break;
+    case EXIT_EVENT:
+      ExitHandler(TF_p->eax);
       break;
     default:
       cons_printf("Kernel Panic: Unknown event_num %d!", TF_p->event_num);

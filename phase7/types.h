@@ -15,6 +15,13 @@
 #define BUFF_SIZE 101     // 100 data char + delimiter null char
 #define TIME_LIMIT 10   // Fast process switch scheduling
 
+<<<<<<< HEAD
+=======
+#define MEM_BASE 0xE00000    // memory pages start at 14M
+#define MEM_PAGE_NUM 100     // kernel maintains 100 memory pages
+#define MEM_PAGE_SIZE 4096   // a memory page has 4096 bytes
+
+>>>>>>> Phase 7 Init
 // Trapframe to save the state of CPU registers /before entering
 // kernel code, and loaded back (in reverse) to resume process
 typedef struct { 
@@ -53,6 +60,7 @@ typedef struct {             // PCB describes proc image
    int cpu_time;             // CPU runtime
    TF_t *TF_p;               // points to trapframe of process
    int wake_time;	     // when to wake up
+   int ppid;
 } pcb_t;
 
 typedef struct {             // generic queue type
@@ -76,5 +84,10 @@ typedef struct {
        read_q,               // read buffer
        loopback_q;           // loopback buffer
 } port_t;
+
+typedef struct {
+   int owner,
+   char *addr;
+} mem_page_t;
 
 #endif //__TYPES_H__

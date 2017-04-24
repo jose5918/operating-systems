@@ -7,7 +7,16 @@
 
 void Init(void) {
   int i;
-  while(1){
+  char key;
+
+  while (1) {
+    if (cons_kbhit()) {
+      key = cons_getchar();
+      switch (key) {
+        case 'b':
+          breakpoint();
+      }
+    }
     for (i = 0; i < LOOP; i++) {
       asm("inb $0x80");
     }
@@ -40,14 +49,17 @@ void Vehicle(void) {
 }
 
 void TermProc(void) {
-	int len,my_port,i;
-	char login_str[BUFF_SIZE], passwd_str[BUFF_SIZE],cmd_str[BUFF_SIZE], cwd[BUFF_SIZE], reverse_passwd_str[BUFF_SIZE];
+	int len,my_port,i,exit_num;
+	char login_str[BUFF_SIZE], passwd_str[BUFF_SIZE],cmd_str[BUFF_SIZE], cwd[BUFF_SIZE], echo_str[BUFF_SIZE], reverse_passwd_str[BUFF_SIZE];
 	char exit_str[] = "exit\0";
 	char pwd_str[] = "pwd\0";
 	char cd_str[] = "cd ";
 	char ls_str[] = "ls\0";
 	char cat_str[] = "cat ";
-
+	char echo_str[] = "echo\0";
+	exit_num = 0;
+	char exit_num_str[BUFF_SIZE];
+	
 	my_port = PortAlloc(); // init port device and port_t data associated
 	while (1){
 		while(1){
@@ -66,6 +78,7 @@ void TermProc(void) {
 					if (MyStrcmp(reverse_passwd_str,login_str,len)){
             MyBzero((char *)&cwd[0],sizeof(char)*BUFF_SIZE);
 						cwd[0] = '/';
+						exit_num = 0;
 						break;
 					}
 				}
@@ -89,6 +102,11 @@ void TermProc(void) {
 					TermLs(cwd,my_port);
 				}else if (MyStrcmp(cmd_str,cat_str,4)){
 					TermCat(&cmd_str[4], cwd, my_port);
+				}else if (MyStrcmp(cmd_str, echo_str, 5)){
+					sprintf(exit_num_str, "%d\n\r", exit_num);
+					PortWrite(exit_num_str, my_port);
+				}else{
+					exit_num = TermBin(cmd_str, cwd, my_port);
 				}
 			}
 		}
@@ -184,3 +202,20 @@ void Attr2Str(attr_t *attr_p, char *str) {
       if ( QBIT_ON(attr_p->mode, A_XOTH) ) str[11] = 'X'; // mode is executable
 }
 
+int TermBin(char *name, char *cwd, int my_port){
+	childpid_str[BUFF_SIZE], attr_data[BUFF_SIZE];
+  attr_t *attr_p;
+	FSfind(name,cwd,attr_data);
+	if (MyStrlen(attr_data) == 0){
+		PortWrite("NOT FOUND \n\r", my_port);
+		return;
+	}
+	attr_p = (attr_t *)attr_data;
+	if (attr_p -> mode  != MODE_EXEC) {
+		PortWrite("NOT AN EXECUTABLE \n\r", my_port);
+		return;
+	}
+	sprintf(childpid_str, "%d \n\r", Fork(attr_p->data));
+	PortWrite(childpid_str, my_port);
+	return Wait();
+}

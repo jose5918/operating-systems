@@ -25,6 +25,9 @@
 #define FSOPEN_EVENT 110
 #define FSREAD_EVENT 111
 #define FSCLOSE_EVENT 112
+#define FORK_EVENT 113
+#define WAIT_EVENT 114
+#define EXIT_EVENT 115
 
 #ifndef ASSEMBLER  // skip below if ASSEMBLER defined (from an assembly code)
                    // since below is not in assembler syntax
@@ -48,6 +51,9 @@ void FSfindEvent(void);
 void FSopenEvent(void);
 void FSreadEvent(void);
 void FScloseEvent(void);
+void ForkEvent(void);
+void WaitEvent(void);
+void ExitEvent(void);
 
 __END_DECLS
 

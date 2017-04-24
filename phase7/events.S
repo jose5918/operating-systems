@@ -81,6 +81,18 @@ ENTRY(FScloseEvent)
     pushl $FSCLOSE_EVENT
     jmp CommonPart
 
+ENTRY(ForkEvent)
+    pushl $FORK_EVENT
+    jmp CommonPart
+
+ENTRY(WaitEvent)
+    pushl $WAIT_EVENT
+    jmp CommonPart
+
+ENTRY(ExitEvent)
+    pushl $EXIT_EVENT
+    jmp CommonPart
+
 CommonPart:
     pusha              // push all: e-a/c/d/b-x, e-s/b-p, e-s/d-i
     pushl %ds          // push 4 data seg registers
