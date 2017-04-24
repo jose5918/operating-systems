@@ -92,7 +92,7 @@ int main() {
 
   for(i = 0; i<MEM_PAGE_NUM; i++){
     mem_page[i].owner = 0;
-    mem_page[i].addr = MEM_BASE + (i*MEM_PAGE_SIZE);
+    mem_page[i].addr = (char *)(MEM_BASE + (i*MEM_PAGE_SIZE));
   }
 
   root_dir[0].size = sizeof(root_dir);   // can only be assigned during runtime
@@ -105,7 +105,7 @@ int main() {
 
   NewProcHandler(Init);
   NewProcHandler(TermProc);
-  // NewProcHandler(TermProc);
+  NewProcHandler(TermProc);
   for(i = 0; i<PORT_NUM; i++){
     port[i].owner = 0;
   }

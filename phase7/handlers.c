@@ -514,14 +514,13 @@ void ForkHandler(char *bin_code, int *child_pid) {
   *child_pid = DeQ(&free_q);
   EnQ(*child_pid, &ready_q);
   MyBzero((char *)&pcb[*child_pid], sizeof(pcb_t));
-  MyBzero((char *)&pcb[*child_pid], PROC_STACK_SIZE); //not sure about this line
   pcb[*child_pid].state = READY;
   pcb[*child_pid].ppid = current_pid; //not sure about this line
 
   //clear memory page
-  MyBzero((char *)mem_page[i].addr, MEM_PAGE_SIZE);
+  MyBzero(mem_page[i].addr, MEM_PAGE_SIZE);
   mem_page[i].owner = *child_pid;
-  MyMemcpy(bin_code, mem_page[i].addr, MEM_PAGE_SIZE);
+  MyMemcpy(mem_page[i].addr,bin_code, MEM_PAGE_SIZE);
 
   pcb[*child_pid].TF_p = (TF_t *)(mem_page[i].addr + MEM_PAGE_SIZE);
   pcb[*child_pid].TF_p--;
@@ -548,7 +547,7 @@ void WaitHandler(int *exit_num_p){
     current_pid = 0;
     return;
   }
-  *exit_num_p = pcb[current_pid].TF_p->eax;
+  *exit_num_p = pcb[child_pid].TF_p->eax;
   EnQ(child_pid, &free_q);
   pcb[child_pid].state = FREE;
   for(page_index=0; page_index < MEM_PAGE_NUM; page_index++){
@@ -570,7 +569,7 @@ void ExitHandler(int exit_num) {
   } else{
     pcb[ppid].state = READY;
     EnQ(ppid, &ready_q);
-    exit_num_p = (int *) pcb[ppid].TF_p->eax;
+    exit_num_p = &(pcb[ppid].TF_p->eax);
     *exit_num_p = exit_num;
   }
   for(page_index = 0; page_index < MEM_PAGE_NUM; page_index++){

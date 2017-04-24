@@ -1,4 +1,5 @@
 #include "data.h"
+#include "tools.h"
 
 int GetPid(void) {  
       int pid;
@@ -127,6 +128,7 @@ void PortRead(char *p, int port_num) { // to read terminal KB
 void FSfind(char *name, char *cwd, char *data) {
     char tmp[BUFF_SIZE];
     MyStrcpy(tmp, cwd);
+    MyStrcat(tmp, "/");
     MyStrcat(tmp, name);
     asm("pushl %%eax;
          pushl %%ebx;
@@ -144,6 +146,7 @@ int FSopen(char *name, char *cwd){
     char tmp[BUFF_SIZE];
     int fd_num;
     MyStrcpy(tmp, cwd);
+    MyStrcat(tmp, "/");
     MyStrcat(tmp, name);
     asm("pushl %%eax;
          pushl %%ebx;

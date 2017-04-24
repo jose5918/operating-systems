@@ -62,7 +62,7 @@ void TermProc(void) {
 	my_port = PortAlloc(); // init port device and port_t data associated
 	while (1){
 		while(1){
-			PortWrite("Please enter your login\n\r", my_port);
+			PortWrite(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\r", my_port);
 			PortWrite("Team Clang Login: ", my_port);
 			PortRead(login_str, my_port);
       len = MyStrlen(login_str);
@@ -81,11 +81,13 @@ void TermProc(void) {
 						break;
 					}
 				}
+        PortWrite("      Stop hacking, get to work!", my_port);
 			}
     }
+    PortWrite("      Welcome!\n\r", my_port);
+    PortWrite("      Services are: pwd, cd dir-name, ls, cat filename, exit\n\r",my_port);
 		while(1){
-			PortWrite("Please enter your command\n\r", my_port);
-			PortWrite("Team Clang command: ", my_port);
+			PortWrite("Team Clang -> ", my_port);
 			PortRead(cmd_str, my_port);
 			if(MyStrlen(cmd_str) != 0){
 
@@ -102,7 +104,7 @@ void TermProc(void) {
 				}else if (MyStrcmp(cmd_str,cat_str,4)){
 					TermCat(&cmd_str[4], cwd, my_port);
 				}else if (MyStrcmp(cmd_str, echo_str, 5)){
-					sprintf(exit_num_str, "%d\n\r", exit_num);
+					sprintf(exit_num_str, "%d (0x%x)\n\r", exit_num, exit_num);
 					PortWrite(exit_num_str, my_port);
 				}else{
 					exit_num = TermBin(cmd_str, cwd, my_port);
@@ -129,17 +131,16 @@ void TermCd(char *name, char *cwd, int my_port){
 	FSfind(name,cwd,attr_data);
 	
 	if (MyStrlen(attr_data) == 0){
-		PortWrite("NOT FOUND \n\r", my_port);
+		PortWrite("      FSfind: No such directory! \n\r", my_port);
 		return;
 	}
 	
 	attr_p = (attr_t *)attr_data;
 	if (attr_p -> mode != MODE_DIR) {
-		PortWrite("CANNOT CD A FILE \n\r", my_port);
+		PortWrite("      Usage: cat a file, not a directory!\n\r", my_port);
 		return;
 	}
 	MyStrcat(cwd, name);
-  MyStrcat(cwd, "/");
 }
 void TermCat(char *name, char *cwd, int my_port){
 	char read_data[BUFF_SIZE], attr_data[BUFF_SIZE];
@@ -147,12 +148,12 @@ void TermCat(char *name, char *cwd, int my_port){
     int my_fd;	
 	FSfind(name,cwd,attr_data);
 	if (MyStrlen(attr_data) == 0){
-		PortWrite("NOT FOUND \n\r", my_port);
+		PortWrite("      FSfind: no such file! \n\r", my_port);
 		return;
 	}
 	attr_p = (attr_t *)attr_data;
 	if (attr_p -> mode  == MODE_DIR) {
-		PortWrite("CANNOT CAT a DIRECTORY \n\r", my_port);
+		PortWrite("      Usage: cat a file, not a directory!\n\r", my_port);
 		return;
 	}
 	my_fd = FSopen(name,cwd);
@@ -174,7 +175,7 @@ void TermLs(char *cwd, int my_port){
 	FSfind("",cwd,attr_data);
   attr_p = (attr_t *) attr_data;
 	if (attr_p -> mode != MODE_DIR) {
-		PortWrite("CANNOT LS A FILE \n\r", my_port);
+		PortWrite("      Cannot LS a file \n\r", my_port);
 	}
 	
 	my_fd = FSopen("",cwd);
@@ -206,15 +207,15 @@ int TermBin(char *name, char *cwd, int my_port){
   attr_t *attr_p;
 	FSfind(name,cwd,attr_data);
 	if (MyStrlen(attr_data) == 0){
-		PortWrite("NOT FOUND \n\r", my_port);
-		return 1;
+		PortWrite("      Command not found! \n\r", my_port);
+		return -1;
 	}
 	attr_p = (attr_t *)attr_data;
 	if (attr_p -> mode  != MODE_EXEC) {
-		PortWrite("NOT AN EXECUTABLE \n\r", my_port);
-		return 1;
+		PortWrite("      Not an executable command! \n\r", my_port);
+		return -1;
 	}
-	sprintf(childpid_str, "%d \n\r", Fork(attr_p->data));
+	sprintf(childpid_str, "Forked child PID %d! \n\r", Fork(attr_p->data));
 	PortWrite(childpid_str, my_port);
 	return Wait();
 }
