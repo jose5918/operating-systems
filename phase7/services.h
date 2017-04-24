@@ -15,5 +15,8 @@ void FSfind(char *, char *, char *);
 int FSopen(char *, char *);
 void FSread(int, char *);
 void FSclose(int);
+int Fork(char *);
+int Wait();
+void Exit(int);
 
 #endif

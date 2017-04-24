@@ -83,7 +83,7 @@ typedef struct {
 } port_t;
 
 typedef struct {
-   int owner,
+   int owner;
    char *addr;
 } mem_page_t;
 

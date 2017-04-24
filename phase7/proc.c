@@ -50,7 +50,7 @@ void Vehicle(void) {
 
 void TermProc(void) {
 	int len,my_port,i,exit_num;
-	char login_str[BUFF_SIZE], passwd_str[BUFF_SIZE],cmd_str[BUFF_SIZE], cwd[BUFF_SIZE], echo_str[BUFF_SIZE], reverse_passwd_str[BUFF_SIZE];
+	char login_str[BUFF_SIZE], passwd_str[BUFF_SIZE],cmd_str[BUFF_SIZE], cwd[BUFF_SIZE], reverse_passwd_str[BUFF_SIZE], exit_num_str[BUFF_SIZE];
 	char exit_str[] = "exit\0";
 	char pwd_str[] = "pwd\0";
 	char cd_str[] = "cd ";
@@ -58,8 +58,7 @@ void TermProc(void) {
 	char cat_str[] = "cat ";
 	char echo_str[] = "echo\0";
 	exit_num = 0;
-	char exit_num_str[BUFF_SIZE];
-	
+
 	my_port = PortAlloc(); // init port device and port_t data associated
 	while (1){
 		while(1){
@@ -203,17 +202,17 @@ void Attr2Str(attr_t *attr_p, char *str) {
 }
 
 int TermBin(char *name, char *cwd, int my_port){
-	childpid_str[BUFF_SIZE], attr_data[BUFF_SIZE];
+	char childpid_str[BUFF_SIZE], attr_data[BUFF_SIZE];
   attr_t *attr_p;
 	FSfind(name,cwd,attr_data);
 	if (MyStrlen(attr_data) == 0){
 		PortWrite("NOT FOUND \n\r", my_port);
-		return;
+		return 1;
 	}
 	attr_p = (attr_t *)attr_data;
 	if (attr_p -> mode  != MODE_EXEC) {
 		PortWrite("NOT AN EXECUTABLE \n\r", my_port);
-		return;
+		return 1;
 	}
 	sprintf(childpid_str, "%d \n\r", Fork(attr_p->data));
 	PortWrite(childpid_str, my_port);

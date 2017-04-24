@@ -105,7 +105,7 @@ int main() {
 
   NewProcHandler(Init);
   NewProcHandler(TermProc);
-  NewProcHandler(TermProc);
+  // NewProcHandler(TermProc);
   for(i = 0; i<PORT_NUM; i++){
     port[i].owner = 0;
   }

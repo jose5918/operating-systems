@@ -511,27 +511,27 @@ void ForkHandler(char *bin_code, int *child_pid) {
     *child_pid = 0;
     return;
   }
-  child_pid = DeQ(&free_q);
-  EnQ(child_pid, &read_q);
-  MyBzero((char *)&pcb[child_pid], sizeof(pcb_t));
-  MyBzero((char *)&pcb[child_pid], PROC_STACK_SIZE); //not sure about this line
-  pcb[child_pid].state = READY;
-  pcb[child_pid].ppid = current_pid; //not sure about this line
+  *child_pid = DeQ(&free_q);
+  EnQ(*child_pid, &ready_q);
+  MyBzero((char *)&pcb[*child_pid], sizeof(pcb_t));
+  MyBzero((char *)&pcb[*child_pid], PROC_STACK_SIZE); //not sure about this line
+  pcb[*child_pid].state = READY;
+  pcb[*child_pid].ppid = current_pid; //not sure about this line
 
   //clear memory page
-  MyBzero((char *)&mem_page[i], MEM_PAGE_SIZE);
-  mem_page[i].owner = child_pid;
+  MyBzero((char *)mem_page[i].addr, MEM_PAGE_SIZE);
+  mem_page[i].owner = *child_pid;
   MyMemcpy(bin_code, mem_page[i].addr, MEM_PAGE_SIZE);
 
-  pcb[child_pid].TF_p = (TF_t *)&proc_stack[child_pid][PROC_STACK_SIZE];
-  pcb[child_pid].TF_p--;
-  pcb[child_pid].TF_p->eip = (unsigned int)p;
-  pcb[child_pid].TF_p->eflags = EF_DEFAULT_VALUE | EF_INTR;
-  pcb[child_pid].TF_p->cs = get_cs();
-  pcb[child_pid].TF_p->ds = get_ds();
-  pcb[child_pid].TF_p->es = get_es();
-  pcb[child_pid].TF_p->fs = get_fs();
-  pcb[child_pid].TF_p->gs = get_gs();
+  pcb[*child_pid].TF_p = (TF_t *)(mem_page[i].addr + MEM_PAGE_SIZE);
+  pcb[*child_pid].TF_p--;
+  pcb[*child_pid].TF_p->eip = (unsigned int)mem_page[i].addr;
+  pcb[*child_pid].TF_p->eflags = EF_DEFAULT_VALUE | EF_INTR;
+  pcb[*child_pid].TF_p->cs = get_cs();
+  pcb[*child_pid].TF_p->ds = get_ds();
+  pcb[*child_pid].TF_p->es = get_es();
+  pcb[*child_pid].TF_p->fs = get_fs();
+  pcb[*child_pid].TF_p->gs = get_gs();
 }
 
 void WaitHandler(int *exit_num_p){
@@ -551,7 +551,7 @@ void WaitHandler(int *exit_num_p){
   *exit_num_p = pcb[current_pid].TF_p->eax;
   EnQ(child_pid, &free_q);
   pcb[child_pid].state = FREE;
-  for(page_index; page_index < MEM_PAGE_NUM; page_index++){
+  for(page_index=0; page_index < MEM_PAGE_NUM; page_index++){
     if (mem_page[page_index].owner == child_pid){
       mem_page[page_index].owner = 0;
     }
@@ -569,8 +569,8 @@ void ExitHandler(int exit_num) {
     return;
   } else{
     pcb[ppid].state = READY;
-    EnQ(ppid, &read_q);
-    exit_num_p = (int *) pcb[ppid].TF->eax;
+    EnQ(ppid, &ready_q);
+    exit_num_p = (int *) pcb[ppid].TF_p->eax;
     *exit_num_p = exit_num;
   }
   for(page_index = 0; page_index < MEM_PAGE_NUM; page_index++){
