@@ -72,6 +72,23 @@ int main() {
  fill_gate(&IDT_p[PORTWRITE_EVENT], (int)PortWriteEvent, get_cs(), ACC_INTR_GATE, 0);
  fill_gate(&IDT_p[PORTREAD_EVENT], (int)PortReadEvent, get_cs(), ACC_INTR_GATE, 0);
  fill_gate(&IDT_p[PORT_EVENT+1], (int)PortEvent, get_cs(), ACC_INTR_GATE, 0);
+
+ // phase6
+ fill_gate(&IDT_p[FSFIND_EVENT], (int)FSfindEvent, get_cs(), ACC_INTR_GATE, 0);
+ fill_gate(&IDT_p[FSOPEN_EVENT], (int)FSopenEvent, get_cs(), ACC_INTR_GATE, 0);
+ fill_gate(&IDT_p[FSREAD_EVENT], (int)FSreadEvent, get_cs(), ACC_INTR_GATE, 0);
+ fill_gate(&IDT_p[FSCLOSE_EVENT], (int)FScloseEvent, get_cs(), ACC_INTR_GATE, 0);
+
+  for(i = 0; i<FD_NUM-1; i++){
+    fd_array[i].owner = 0;
+  }
+
+  root_dir[0].size = sizeof(root_dir);   // can only be assigned during runtime
+  bin_dir[0].size = sizeof(bin_dir);     // even tho they're compiler-time sizes
+  bin_dir[1].size = root_dir[0].size;    // otherwise, they would be recursive
+  www_dir[0].size = sizeof(www_dir);     // definitions which compiler rejects
+  www_dir[1].size = root_dir[0].size;
+
   outportb(0x21, ~0x19);
 
   NewProcHandler(Init);
@@ -106,6 +123,18 @@ void Kernel(TF_t *TF_p) {
       break;
     case PORTALLOC_EVENT:
       PortAllocHandler(&(TF_p->eax));
+      break;
+    case FSREAD_EVENT:
+      FSreadHandler();
+      break;
+    case FSFIND_EVENT:
+      FSfindHandler();
+      break;
+    case FSOPEN_EVENT:
+      FSopenHandler();
+      break;
+    case FSCLOSE_EVENT:
+      FScloseHandler();
       break;
     case SYSPRINT_EVENT:
       SysPrintHandler((char *)TF_p->eax);

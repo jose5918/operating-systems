@@ -65,6 +65,22 @@ ENTRY(PortReadEvent)
     pushl $PORTREAD_EVENT
     jmp CommonPart
 
+ENTRY(FSfindEvent)
+    pushl $FSFIND_EVENT
+    jmp CommonPart
+
+ENTRY(FSopenEvent)
+    pushl $FSOPEN_EVENT
+    jmp CommonPart
+
+ENTRY(FSreadEvent)
+    pushl $FSREAD_EVENT
+    jmp CommonPart
+
+ENTRY(FScloseEvent)
+    pushl $FSCLOSE_EVENT
+    jmp CommonPart
+
 CommonPart:
     pusha              // push all: e-a/c/d/b-x, e-s/b-p, e-s/d-i
     pushl %ds          // push 4 data seg registers

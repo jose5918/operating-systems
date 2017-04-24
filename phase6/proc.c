@@ -65,6 +65,7 @@ void TermProc(void) {
 				if (MyStrlen(passwd_str) == len){
 					if (MyStrcmp(reverse_passwd_str,login_str,len)){
             MyBzero((char *)&cwd[0],sizeof(char)*BUFF_SIZE);
+
 						cwd[0] = '/';
 						break;
 					}

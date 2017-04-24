@@ -8,6 +8,12 @@
 void MyBzero(char *, int);
 int DeQ(q_t *);
 void EnQ(int, q_t *);
+int MyStrlen(char *);
+void MyStrcat(char *, char *);
+int MyStrcmp(char *, char *, int);
+void MyStrcpy(char *, char *);
+void MyMemcpy(char *, char *, int);
+char MyStrReverse(char *);
 
 #endif
 
