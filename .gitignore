@@ -2,5 +2,6 @@
 *.o
 *.RC
 *.orig
-Make
+Makefile
 *.dli
+.DS_Store
