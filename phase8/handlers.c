@@ -492,45 +492,68 @@ void FScloseHandler(void) {
 }
 
 //phase 7
-
 void ForkHandler(char *bin_code, int *child_pid) {
-  int i;
+  int i, got, page_got[5];
+  TF_t *TF_p;
+  char *main_table, *code_table, *stack_table, *code_page, *stack_page;
 
+  got = 0;
   for (i=0; i<MEM_PAGE_NUM; i++){
     if(mem_page[i].owner == 0){
-      break;
+      page_got[got++] = i;
+      if(got == 5) break;
     }
   }
-  if (i == MEM_PAGE_NUM){
-    cons_printf("Kernel Panic: no memory page avaialable!\n");
+
+  if (got < 5){
+    cons_printf("Kernel Panic: not enough memory pages available!\n");
     *child_pid = 0;
     return;
   }
+
   if (free_q.size == 0){
     cons_printf("Kernel Panic: no PID available!\n");
     *child_pid = 0;
     return;
   }
+
+  main_table = mem_page[page_got[0]].addr;
+  code_table = mem_page[page_got[1]].addr;
+  stack_table = mem_page[page_got[2]].addr;
+  code_page = mem_page[page_got[3]].addr;
+  stack_page = mem_page[page_got[4]].addr;
+
   *child_pid = DeQ(&free_q);
-  EnQ(*child_pid, &ready_q);
+  for(got = 0; i<5; i++){
+    mem_page[page_got[got]].owner = *child_pid;
+    MyBzero(mem_page[page_got[got]].addr, MEM_PAGE_SIZE);
+  }
   MyBzero((char *)&pcb[*child_pid], sizeof(pcb_t));
+  EnQ(*child_pid, &ready_q);
   pcb[*child_pid].state = READY;
-  pcb[*child_pid].ppid = current_pid; //not sure about this line
-
-  //clear memory page
-  MyBzero(mem_page[i].addr, MEM_PAGE_SIZE);
-  mem_page[i].owner = *child_pid;
-  MyMemcpy(mem_page[i].addr,bin_code, MEM_PAGE_SIZE);
-
-  pcb[*child_pid].TF_p = (TF_t *)(mem_page[i].addr + MEM_PAGE_SIZE);
+  pcb[*child_pid].ppid = current_pid;
+  pcb[*child_pid].TF_p = (TF_t *) 0x80000000;
   pcb[*child_pid].TF_p--;
-  pcb[*child_pid].TF_p->eip = (unsigned int)mem_page[i].addr;
+  pcb[*child_pid].MMU = (int) main_table;
+
+  MyMemcpy(code_table,bin_code, MEM_PAGE_SIZE);
+
+  TF_p = stack_page + MEM_PAGE_SIZE - sizeof(TF_t);
+  pcb[*child_pid].TF_p->eip = (unsigned int) 0x40000000;
   pcb[*child_pid].TF_p->eflags = EF_DEFAULT_VALUE | EF_INTR;
   pcb[*child_pid].TF_p->cs = get_cs();
   pcb[*child_pid].TF_p->ds = get_ds();
   pcb[*child_pid].TF_p->es = get_es();
   pcb[*child_pid].TF_p->fs = get_fs();
   pcb[*child_pid].TF_p->gs = get_gs();
+
+
+// G. MyMemcpy 1st 4 entries from kernel_MMU into main_table
+//    Set entries 256 of main_table to code_table (bitwise-OR the two flags)
+//    Set entries 511 of main_table to stack_table (bitwise-OR the two flags)
+//    set entry 0 in code_table to code_page (bitwise-OR the two flags)
+//    set entry 1023 in stack_table to stack_page (bitwise-OR the two flags)
+| 0x3
 }
 
 void WaitHandler(int *exit_num_p){

@@ -28,4 +28,7 @@ extern dir_t root_dir[11];
 extern fd_t fd_array[FD_NUM];
 extern mem_page_t mem_page[MEM_PAGE_NUM];
 
+extern int kernel_MMU;
+
+
 #endif // ifndef __DATA_H__         ('name-mangling' prevention)

@@ -24,6 +24,7 @@ int vehicle_sid;
 port_t port[PORT_NUM];
 
 mem_page_t mem_page[MEM_PAGE_NUM];
+int kernel_MMU;
 
 void Scheduler() {
   if (current_pid != 0) return;
@@ -48,6 +49,7 @@ int main() {
  current_time = 0;
  current_pid = 0;
   vehicle_sid =-1;
+  kernel_MMU = get_cr3();
 
   MyBzero((char *)&free_q, sizeof(q_t));
   MyBzero((char *)&ready_q, sizeof(q_t));
@@ -95,6 +97,10 @@ int main() {
     mem_page[i].addr = (char *)(MEM_BASE + (i*MEM_PAGE_SIZE));
   }
 
+  for (i = 0; i < PROC_NUM; i++){
+    pcb[i].MMU = 0;
+  }
+
   root_dir[0].size = sizeof(root_dir);   // can only be assigned during runtime
   bin_dir[0].size = sizeof(bin_dir);     // even tho they're compiler-time sizes
   bin_dir[1].size = root_dir[0].size;    // otherwise, they would be recursive
@@ -111,7 +117,7 @@ int main() {
   }
 
   Scheduler();
-
+  set_cr3(kernel_MMU);
   Loader(pcb[current_pid].TF_p);
   return 0;
 }
@@ -181,5 +187,6 @@ void Kernel(TF_t *TF_p) {
   }
 
   Scheduler();
+  set_cr3(pcb[current_pid].MMU);
   Loader(pcb[current_pid].TF_p);
 }
