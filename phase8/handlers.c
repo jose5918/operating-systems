@@ -539,21 +539,20 @@ void ForkHandler(char *bin_code, int *child_pid) {
   MyMemcpy(code_table,bin_code, MEM_PAGE_SIZE);
 
   TF_p = stack_page + MEM_PAGE_SIZE - sizeof(TF_t);
-  pcb[*child_pid].TF_p->eip = (unsigned int) 0x40000000;
-  pcb[*child_pid].TF_p->eflags = EF_DEFAULT_VALUE | EF_INTR;
-  pcb[*child_pid].TF_p->cs = get_cs();
-  pcb[*child_pid].TF_p->ds = get_ds();
-  pcb[*child_pid].TF_p->es = get_es();
-  pcb[*child_pid].TF_p->fs = get_fs();
-  pcb[*child_pid].TF_p->gs = get_gs();
+  TF_p->eip = (unsigned int) 0x40000000;
+  TF_p->eflags = EF_DEFAULT_VALUE | EF_INTR;
+  TF_p->cs = get_cs();
+  TF_p->ds = get_ds();
+  TF_p->es = get_es();
+  TF_p->fs = get_fs();
+  TF_p->gs = get_gs();
 
+  MyMemcpy(main_table,(char *) kernel_MMU, MEM_PAGE_SIZE*4);
+  main_table[256] = (int) code_table | 0x3;
+  main_table[511] = (int) main_table | 0x3;
+  code_table[0] = (int) code_page | 0x3;
+  stack_table[1023] = (int) stack_page | 0x3;
 
-// G. MyMemcpy 1st 4 entries from kernel_MMU into main_table
-//    Set entries 256 of main_table to code_table (bitwise-OR the two flags)
-//    Set entries 511 of main_table to stack_table (bitwise-OR the two flags)
-//    set entry 0 in code_table to code_page (bitwise-OR the two flags)
-//    set entry 1023 in stack_table to stack_page (bitwise-OR the two flags)
-| 0x3
 }
 
 void WaitHandler(int *exit_num_p){
@@ -570,7 +569,10 @@ void WaitHandler(int *exit_num_p){
     current_pid = 0;
     return;
   }
+  set_cr3(pcb[child_pid].MMU);
   *exit_num_p = pcb[child_pid].TF_p->eax;
+  set_cr3(pcb[current_pid].MMU);
+  
   EnQ(child_pid, &free_q);
   pcb[child_pid].state = FREE;
   for(page_index=0; page_index < MEM_PAGE_NUM; page_index++){
