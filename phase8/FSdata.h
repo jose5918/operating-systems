@@ -60,6 +60,11 @@ char sleep3[]= {
 };
 #define SLEEP3_SIZE (sizeof(sleep3))
 
+char printer_msg[]= {
+  #include "bin-code/printer_msg.txt"
+}
+#define PRINTER_MSG_SIZE (sizeof(printer_msg))
+
 // We'll define "root_dir[]" later. Here is a forward declare.
 extern dir_t root_dir[];                         // prototype it in advance
 
@@ -67,6 +72,7 @@ dir_t bin_dir[] = {
    {16, MODE_DIR, 0, ".", (char *)bin_dir},   // current dir
    {17, MODE_DIR, 0, "..", (char *)root_dir}, // parent dir, forward declared
    {18, MODE_EXEC, SLEEP3_SIZE, "sleep3", (char *)sleep3 },
+   {19, MODE_EXEC, PRINTER_MSG_SIZE, "printer_msg", (char *)printer_msg},
    {0, 0, 0, NULL, NULL},                      // no entries in dir
    {END_INODE, 0, 0, NULL, NULL}               // end of bin_dir[]
 };
